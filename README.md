@@ -416,3 +416,9 @@ These ideas are planned for later sessions and are **not** implemented yet:
 - **More galaxies.** Bitcoin as a second, independent galaxy from the same generator.
 
 **Deliberately out of scope:** wallets, logins, tokens, NFTs, smart contracts, writing on-chain, multiplayer, mobile, 3D.
+
+---
+
+## License
+
+[MIT](LICENSE). PixiJS, vendored in `src/Decentraverse.Web/wwwroot/lib/pixi`, keeps its own [MIT license](src/Decentraverse.Web/wwwroot/lib/pixi/LICENSE).
