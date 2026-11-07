@@ -1,0 +1,127 @@
+<aside class="panel">
+    <button class="back" @onclick="OnBack">← Torna alla galassia</button>
+
+    <h2>@System.Name</h2>
+    <p class="kind">
+        @Labels.StarDescription(System.Stars[0])
+        @if (System.IsBinary)
+        {
+            <span> + @Labels.StarDescription(System.Stars[1]).ToLowerInvariant() · sistema binario</span>
+        }
+    </p>
+
+    <section class="verify">
+        <div class="label">Generato da questo hash</div>
+        <code class="hash">@Block.Hash</code>
+        <a href="https://etherscan.io/block/@Block.Number" target="_blank" rel="noopener">Blocco #@Labels.Number(Block.Number) su Etherscan ↗</a>
+        <details>
+            <summary>Come verificarlo</summary>
+            <p>Ogni parte del sistema nasce da un seme SHA-256. Chiunque può ricalcolarli, ad esempio da terminale:</p>
+            <code class="cmd">printf '%s' "@StarSeedInput" | shasum -a 256</code>
+            <dl>
+                <dt>seme stella</dt>
+                <dd><code>@Hex(Seeds.Star(System.BlockHash))</code></dd>
+                <dt>seme eventi rari</dt>
+                <dd><code>@Hex(Seeds.Rare(System.BlockHash))</code></dd>
+            </dl>
+            <p>Buco nero se il seme degli eventi rari inizia con <code>0000</code> (1 su 65.536). Regole del generatore: <b>@System.GeneratorVersion</b>.</p>
+        </details>
+    </section>
+
+    @if (System.IsBlackHole)
+    {
+        <section>
+            <p class="rare">Un buco nero: capita una volta ogni 65.536 blocchi. Il seme degli eventi rari di questo blocco inizia con <code>0000</code>.</p>
+            <dl class="facts">
+                <dt>Massa</dt><dd>@Labels.Thousandths(System.Stars[0].MassMilliSolar) M☉</dd>
+            </dl>
+        </section>
+    }
+    else
+    {
+        <section>
+            <h3>@(System.IsBinary ? "Stelle" : "Stella")</h3>
+            @foreach (var star in System.Stars)
+            {
+                <dl class="facts">
+                    @if (System.IsBinary)
+                    {
+                        <dt>Stella @star.Designation</dt><dd>classe @star.Class</dd>
+                    }
+                    <dt>Massa</dt><dd>@Labels.Thousandths(star.MassMilliSolar) M☉</dd>
+                    <dt>Temperatura</dt><dd>@Labels.Number(star.TemperatureK) K</dd>
+                    <dt>Luminosità</dt><dd>@Labels.Solar(star.LuminosityMicroSolar) L☉</dd>
+                </dl>
+            }
+            <dl class="facts">
+                @if (System.IsBinary)
+                {
+                    <dt>Separazione</dt><dd>@Labels.Au(System.BinarySeparationMicroAu)</dd>
+                }
+                <dt>Zona abitabile</dt><dd>@Labels.Au(System.HabitableZoneInnerMicroAu) – @Labels.Au(System.HabitableZoneOuterMicroAu)</dd>
+            </dl>
+        </section>
+    }
+
+    <section>
+        <h3>Blocco</h3>
+        <dl class="facts">
+            <dt>Data</dt><dd>@Labels.Date(Block.Timestamp)</dd>
+            <dt>Transazioni</dt><dd>@Labels.Number(Block.TxCount)</dd>
+            <dt>Gas usato</dt><dd>@Labels.Number(Block.GasUsed)</dd>
+            <dt>Densità</dt><dd>@System.Density / 1000</dd>
+        </dl>
+    </section>
+
+    @if (System.Planets.Count > 0)
+    {
+        <section>
+            <h3>Pianeti (@System.Planets.Count)</h3>
+            <ul class="planets">
+                @foreach (var p in System.Planets)
+                {
+                    <li class="@(p.Index == SelectedPlanet ? "selected" : "")">
+                        <button @onclick="() => OnSelectPlanet.InvokeAsync(p.Index)">
+                            <span class="swatch" style="--c:#@Labels.PlanetColor(p.Type).ToString("x6")"></span>
+                            <span class="pname">@p.Name</span>
+                            <span class="pmeta">@Labels.PlanetType(p.Type) · @Labels.Zone(p.Zone) · @Labels.Au(p.OrbitMicroAu) · @Labels.Thousandths(p.RadiusMilliEarth) R⊕ · @(p.MoonCount == 1 ? "1 luna" : $"{p.MoonCount} lune")</span>
+                        </button>
+                        @if (p.Index == SelectedPlanet && Moons is not null)
+                        {
+                            @if (Moons.Count == 0)
+                            {
+                                <p class="moons-empty">Nessuna luna.</p>
+                            }
+                            else
+                            {
+                                <ul class="moons">
+                                    @foreach (var m in Moons)
+                                    {
+                                        <li><b>@m.Name</b> · @Labels.MoonType(m.Type) · raggio @Labels.Number(m.RadiusKm) km · orbita @Labels.Number(m.OrbitKm) km</li>
+                                    }
+                                </ul>
+                            }
+                        }
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+    else if (!System.IsBlackHole)
+    {
+        <section><p class="moons-empty">Nessun pianeta in questo sistema.</p></section>
+    }
+</aside>
+
+@code {
+    [Parameter, EditorRequired] public BlockInput Block { get; set; } = default!;
+    [Parameter, EditorRequired] public StarSystem System { get; set; } = default!;
+    [Parameter] public IReadOnlyList<Moon>? Moons { get; set; }
+    [Parameter] public int? SelectedPlanet { get; set; }
+    [Parameter] public EventCallback OnBack { get; set; }
+    [Parameter] public EventCallback<int> OnSelectPlanet { get; set; }
+
+    private string StarSeedInput => $"{GeneratorInfo.Version}:{System.BlockHash}:star";
+
+    private static string Hex(byte[] bytes) => Convert.ToHexStringLower(bytes);
+}
