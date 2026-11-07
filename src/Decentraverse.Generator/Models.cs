@@ -1,12 +1,12 @@
 namespace Decentraverse.Generator;
 
-// Tutte le grandezze sono interi a virgola fissa, così l'output (e gli snapshot JSON)
-// non dipendono mai dal floating point. Unità:
-//   distanze planetarie → micro-UA (1_000_000 = 1 UA)
-//   massa stellare      → milli-masse solari (1000 = il Sole)
-//   luminosità          → micro-luminosità solari (1_000_000 = il Sole)
-//   raggio planetario   → milli-raggi terrestri (1000 = la Terra)
-//   lune                → chilometri
+// All quantities are fixed-point integers, so the output (and the JSON snapshots)
+// never depend on floating point. Units:
+//   planetary distances → micro-AU (1_000_000 = 1 AU)
+//   stellar mass        → milli solar masses (1000 = the Sun)
+//   luminosity          → micro solar luminosities (1_000_000 = the Sun)
+//   planetary radius    → milli Earth radii (1000 = the Earth)
+//   moons               → kilometres
 
 public enum StarKind { Star, BlackHole }
 
@@ -14,17 +14,17 @@ public enum SpectralClass { O, B, A, F, G, K, M }
 
 public enum PlanetType { Rocky, Gas, Ice, Lava }
 
-/// <summary>Posizione rispetto alla zona abitabile (HZ).</summary>
+/// <summary>Position relative to the habitable zone (HZ).</summary>
 public enum OrbitZone
 {
-    /// <summary>Più vicino di metà del bordo interno della HZ.</summary>
+    /// <summary>Closer than half the inner edge of the HZ.</summary>
     Scorched,
-    /// <summary>Tra metà del bordo interno e il bordo interno.</summary>
+    /// <summary>Between half the inner edge and the inner edge.</summary>
     Hot,
     Habitable,
-    /// <summary>Oltre la HZ, fino al doppio del bordo esterno (linea del gelo).</summary>
+    /// <summary>Beyond the HZ, up to twice the outer edge (frost line).</summary>
     Cold,
-    /// <summary>Oltre la linea del gelo.</summary>
+    /// <summary>Beyond the frost line.</summary>
     Frozen,
 }
 

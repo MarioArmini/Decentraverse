@@ -1,14 +1,14 @@
 namespace Decentraverse.Generator;
 
 /// <summary>
-/// Eventi rari decisi da pattern di bit del seme "rare" (non dal PRNG),
-/// così le probabilità sono esatte e verificabili a occhio sull'hash esadecimale.
+/// Rare events decided by bit patterns of the "rare" seed (not by the PRNG),
+/// so the probabilities are exact and can be checked by eye on the hex hash.
 /// </summary>
 public static class RareEvents
 {
-    /// <summary>Primi 16 bit a zero (il seme in esadecimale inizia con "0000"): 1 su 65.536.</summary>
+    /// <summary>First 16 bits zero (the hex seed starts with "0000"): 1 in 65,536.</summary>
     public static bool IsBlackHole(ReadOnlySpan<byte> rareSeed) => rareSeed[0] == 0 && rareSeed[1] == 0;
 
-    /// <summary>5 bit bassi del terzo byte a zero: 1 su 32. Ignorato se il sistema è un buco nero.</summary>
+    /// <summary>Low 5 bits of the third byte zero: 1 in 32. Ignored if the system is a black hole.</summary>
     public static bool IsBinary(ReadOnlySpan<byte> rareSeed) => (rareSeed[2] & 0x1F) == 0;
 }

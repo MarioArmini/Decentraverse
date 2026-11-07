@@ -4,8 +4,8 @@ namespace Decentraverse.Generator.Tests;
 
 public class Xoshiro128StarStarTests
 {
-    // Valori ottenuti compilando l'implementazione di riferimento in C
-    // (https://prng.di.unimi.it/xoshiro128starstar.c) con lo stesso stato iniziale.
+    // Values obtained by compiling the C reference implementation
+    // (https://prng.di.unimi.it/xoshiro128starstar.c) with the same initial state.
     [Theory]
     [InlineData(1u, 2u, 3u, 4u,
         new uint[] { 11520, 0, 5927040, 70819200, 2031721883, 1637235492, 1287239034, 3734860849, 3729100597, 4258142804 },
@@ -40,7 +40,7 @@ public class Xoshiro128StarStarTests
             0x02, 0x00, 0x00, 0x00,
             0x03, 0x00, 0x00, 0x00,
             0x04, 0x00, 0x00, 0x00,
-            0xFF, 0xFF, // byte oltre il sedicesimo: ignorati
+            0xFF, 0xFF, // bytes after the sixteenth: ignored
         ];
 
         var fromSeed = Xoshiro128StarStar.FromSeed(seed);
@@ -92,8 +92,8 @@ public class Xoshiro128StarStarTests
     [Fact]
     public void NextBelowIsRoughlyUniform()
     {
-        // 6 valori, 600.000 estrazioni: attesi 100.000 ciascuno, σ ≈ 289.
-        // Tolleranza ±1.500 (≈ 5σ): un fallimento indica un bug, non sfortuna.
+        // 6 values, 600,000 draws: 100,000 expected each, σ ≈ 289.
+        // Tolerance ±1,500 (≈ 5σ): a failure means a bug, not bad luck.
         var rng = new Xoshiro128StarStar(0xDEADBEEF, 0x01234567, 0x89ABCDEF, 0xFEDCBA98);
         var counts = new int[6];
         for (int i = 0; i < 600_000; i++)
@@ -126,7 +126,7 @@ public class Xoshiro128StarStarTests
     [Fact]
     public void NextChanceMatchesProbability()
     {
-        // p = 1/4 su 400.000 prove: attesi 100.000, σ ≈ 274; tolleranza ±1.500.
+        // p = 1/4 over 400,000 trials: 100,000 expected, σ ≈ 274; tolerance ±1,500.
         var rng = new Xoshiro128StarStar(9, 10, 11, 12);
         int hits = 0;
         for (int i = 0; i < 400_000; i++)

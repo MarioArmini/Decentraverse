@@ -27,7 +27,7 @@ public class InvariantTests
                 Assert.True(p.OrbitMicroAu > previous, $"{s.Name}: orbite non crescenti");
                 previous = p.OrbitMicroAu;
 
-                // Niente lava fuori dalle zone calde, niente ghiaccio troppo vicino alla stella.
+                // No lava outside the hot zones, no ice too close to the star.
                 if (p.Type == PlanetType.Lava)
                 {
                     Assert.Contains(p.Zone, new[] { OrbitZone.Scorched, OrbitZone.Hot });

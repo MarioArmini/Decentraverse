@@ -1,13 +1,13 @@
 namespace Decentraverse.Generator;
 
-/// <summary>I soli dati del blocco che il generatore usa.</summary>
+/// <summary>The only block data the generator uses.</summary>
 public sealed record BlockInput(long Number, string Hash, long Timestamp, int TxCount, long GasUsed);
 
 public static class BlockHash
 {
     /// <summary>
-    /// Forma canonica dell'hash usata nei semi: "0x" + 64 cifre esadecimali minuscole.
-    /// Chi verifica a mano deve usare esattamente questa forma.
+    /// Canonical hash form used in seeds: "0x" + 64 lowercase hex digits.
+    /// Anyone verifying by hand must use exactly this form.
     /// </summary>
     public static string Normalize(string hash)
     {

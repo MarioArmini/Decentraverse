@@ -4,14 +4,14 @@ using System.Text.Json;
 namespace Decentraverse.Generator.Tests;
 
 /// <summary>
-/// Golden test: l'output su 5 blocchi reali (sistemi + tutte le lune) è confrontato con il file
-/// Golden/&lt;versione&gt;.json committato nel repo.
+/// Golden test: the output for 5 real blocks (systems + all moons) is compared with the file
+/// Golden/&lt;version&gt;.json committed to the repo.
 ///
-/// - Output cambiato con la stessa versione → il test fallisce. È lo scopo: l'universo non deve
-///   cambiare in silenzio. Se il cambio è voluto, si alza GeneratorInfo.Version.
-/// - Versione nuova senza file → il test fallisce e spiega come crearlo:
+/// - Output changed with the same version → the test fails. That is the point: the universe must not
+///   change silently. If the change is intended, bump GeneratorInfo.Version.
+/// - New version without a file → the test fails and explains how to create it:
 ///       DECENTRAVERSE_WRITE_GOLDEN=1 dotnet test
-///   Il file di una versione esistente non viene MAI sovrascritto.
+///   The file of an existing version is NEVER overwritten.
 /// </summary>
 public class GoldenTests
 {
@@ -84,6 +84,6 @@ public class GoldenTests
         return "nessuna";
     }
 
-    /// <summary>La cartella di questo file sorgente: i file golden si leggono e scrivono lì, non in bin/.</summary>
+    /// <summary>The folder of this source file: golden files are read and written there, not in bin/.</summary>
     private static string SourceDirectory([CallerFilePath] string path = "") => Path.GetDirectoryName(path)!;
 }

@@ -1,9 +1,9 @@
 namespace Decentraverse.Generator.Tests;
 
 /// <summary>
-/// 100.000 sistemi da semi sintetici: le frequenze devono stare entro 5σ dalle probabilità
-/// dichiarate. Con 5σ un generatore corretto fallisce circa 1 volta su 1,7 milioni, quindi
-/// un fallimento indica un errore nelle tabelle, non sfortuna (e il test è comunque deterministico).
+/// 100,000 systems from synthetic seeds: frequencies must lie within 5σ of the declared
+/// probabilities. At 5σ a correct generator fails about once in 1.7 million runs, so
+/// a failure means an error in the tables, not bad luck (and the test is deterministic anyway).
 /// </summary>
 public class DistributionTests
 {
@@ -15,8 +15,8 @@ public class DistributionTests
     [Fact]
     public void SpectralClassFrequencies()
     {
-        // Ogni stella (anche la compagna di una binaria) è estratta in modo indipendente dalla stessa tabella,
-        // quindi si contano tutte le stelle, non solo le primarie (lo scambio A/B per massa sposterebbe le primarie).
+        // Every star (binary companions included) is drawn independently from the same table,
+        // so all stars are counted, not just primaries (the A/B swap by mass would skew primaries).
         var stars = Generated.Value.SelectMany(s => s.Stars).Where(s => s.Kind == StarKind.Star).ToArray();
 
         foreach (var spec in StarTables.Classes)
@@ -36,8 +36,8 @@ public class DistributionTests
     [Fact]
     public void BlackHolesAreRareInFullSystems()
     {
-        // Atteso ~1,5 su 100.000: qui si controlla solo che non siano frequenti (la frequenza vera
-        // è testata su 2 milioni di semi in RareEventsTests).
+        // ~1.5 expected in 100,000: here we only check they are not frequent (the real frequency
+        // is tested over 2 million seeds in RareEventsTests).
         Assert.InRange(Generated.Value.Count(s => s.IsBlackHole), 0, 12);
     }
 

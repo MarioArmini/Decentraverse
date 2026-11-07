@@ -1,6 +1,6 @@
 namespace Decentraverse.Indexer;
 
-/// <summary>Configurazione da variabili d'ambiente, con il file .env della radice del repo come fallback.</summary>
+/// <summary>Configuration from environment variables, falling back to the .env file at the repo root.</summary>
 public sealed record Settings(Uri RpcUrl, string DatabasePath, int ApiPort)
 {
     public static Settings Load()
@@ -21,7 +21,7 @@ public sealed record Settings(Uri RpcUrl, string DatabasePath, int ApiPort)
         return new Settings(new Uri(rpc), Path.GetFullPath(db, root), int.Parse(port, System.Globalization.CultureInfo.InvariantCulture));
     }
 
-    /// <summary>La cartella che contiene Decentraverse.slnx, risalendo da quella corrente.</summary>
+    /// <summary>The folder containing Decentraverse.slnx, searching upwards from the current one.</summary>
     public static string FindRepoRoot()
     {
         for (var dir = new DirectoryInfo(Directory.GetCurrentDirectory()); dir is not null; dir = dir.Parent)
@@ -35,8 +35,8 @@ public sealed record Settings(Uri RpcUrl, string DatabasePath, int ApiPort)
     }
 
     /// <summary>
-    /// Lettore minimale di .env: righe CHIAVE=valore, commenti con #, virgolette facoltative.
-    /// Le variabili già presenti nell'ambiente hanno la precedenza.
+    /// Minimal .env reader: KEY=value lines, # comments, optional quotes.
+    /// Variables already set in the environment take precedence.
     /// </summary>
     private static void LoadEnvFile(string path)
     {

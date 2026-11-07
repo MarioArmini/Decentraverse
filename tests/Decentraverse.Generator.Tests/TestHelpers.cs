@@ -13,13 +13,13 @@ internal static class TestHelpers
         Converters = { new JsonStringEnumConverter() },
     };
 
-    /// <summary>Hash sintetico ma ben formato, derivato da un intero: SHA-256("synthetic:i").</summary>
+    /// <summary>Synthetic but well-formed hash derived from an integer: SHA-256("synthetic:i").</summary>
     public static string SyntheticHash(int i) =>
         "0x" + Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes($"synthetic:{i}")));
 
     public static BlockInput SyntheticBlock(int i) => new(i, SyntheticHash(i), 1_700_000_000 + 12L * i, 150, 15_000_000);
 
-    /// <summary>Verifica che un conteggio binomiale stia entro k deviazioni standard dall'atteso.</summary>
+    /// <summary>Checks that a binomial count lies within k standard deviations of the expected value.</summary>
     public static void AssertBinomial(long observed, long trials, double p, double k, string label)
     {
         double expected = trials * p;

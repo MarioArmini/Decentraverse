@@ -5,9 +5,9 @@ using System.Text;
 namespace Decentraverse.Generator;
 
 /// <summary>
-/// Semi gerarchici: SHA-256 (UTF-8) di una stringa che contiene versione, hash e percorso.
-/// Ogni parte del sistema ha il proprio seme, così si genera solo ciò che serve.
-/// L'hash deve essere già in forma canonica (vedi <see cref="BlockHash.Normalize"/>).
+/// Hierarchical seeds: SHA-256 (UTF-8) of a string holding version, hash and path.
+/// Each part of the system has its own seed, so only what is needed gets generated.
+/// The hash must already be canonical (see <see cref="BlockHash.Normalize"/>).
 /// </summary>
 public static class Seeds
 {

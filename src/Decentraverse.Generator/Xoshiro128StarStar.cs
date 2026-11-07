@@ -5,8 +5,8 @@ namespace Decentraverse.Generator;
 
 /// <summary>
 /// PRNG xoshiro128** 1.1 (Blackman &amp; Vigna, https://prng.di.unimi.it/).
-/// Usa solo aritmetica intera a 32 bit senza segno: l'output è identico
-/// su qualunque piattaforma e in qualunque linguaggio che implementi lo stesso algoritmo.
+/// Uses only unsigned 32-bit integer arithmetic: the output is identical
+/// on any platform and in any language that implements the same algorithm.
 /// </summary>
 public sealed class Xoshiro128StarStar
 {
@@ -26,8 +26,8 @@ public sealed class Xoshiro128StarStar
     }
 
     /// <summary>
-    /// Inizializza lo stato con i primi 16 byte del seme, letti come
-    /// quattro uint32 little-endian (byte 0–3 → s0, 4–7 → s1, ...).
+    /// Initializes the state from the first 16 bytes of the seed, read as
+    /// four little-endian uint32 values (bytes 0–3 → s0, 4–7 → s1, ...).
     /// </summary>
     public static Xoshiro128StarStar FromSeed(ReadOnlySpan<byte> seed)
     {
@@ -43,7 +43,7 @@ public sealed class Xoshiro128StarStar
             BinaryPrimitives.ReadUInt32LittleEndian(seed[12..16]));
     }
 
-    /// <summary>Prossimo valore a 32 bit (traduzione diretta di next() del riferimento C).</summary>
+    /// <summary>Next 32-bit value (direct translation of next() from the C reference).</summary>
     public uint NextUInt32()
     {
         unchecked
@@ -64,8 +64,8 @@ public sealed class Xoshiro128StarStar
     }
 
     /// <summary>
-    /// Intero uniforme in [0, bound), senza bias: scarta i valori sotto la soglia
-    /// (2^32 mod bound) e poi usa il modulo. Solo operazioni intere.
+    /// Uniform integer in [0, bound) without bias: rejects values below the threshold
+    /// (2^32 mod bound), then takes the modulo. Integer operations only.
     /// </summary>
     public uint NextBelow(uint bound)
     {
@@ -85,7 +85,7 @@ public sealed class Xoshiro128StarStar
         }
     }
 
-    /// <summary>Intero uniforme in [minInclusive, maxExclusive).</summary>
+    /// <summary>Uniform integer in [minInclusive, maxExclusive).</summary>
     public int NextInt(int minInclusive, int maxExclusive)
     {
         if (maxExclusive <= minInclusive)
@@ -97,6 +97,6 @@ public sealed class Xoshiro128StarStar
         return unchecked(minInclusive + (int)NextBelow(range));
     }
 
-    /// <summary>Vero con probabilità esatta numerator/denominator.</summary>
+    /// <summary>True with exact probability numerator/denominator.</summary>
     public bool NextChance(uint numerator, uint denominator) => NextBelow(denominator) < numerator;
 }

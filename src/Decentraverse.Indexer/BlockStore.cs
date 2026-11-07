@@ -3,8 +3,8 @@ using Microsoft.Data.Sqlite;
 namespace Decentraverse.Indexer;
 
 /// <summary>
-/// Archivio SQLite dei blocchi. Ogni operazione apre la propria connessione (il pool la riusa),
-/// così l'API può leggere mentre il watch scrive; la modalità WAL permette letture concorrenti.
+/// SQLite block store. Each operation opens its own connection (the pool reuses it),
+/// so the API can read while watch writes; WAL mode allows concurrent reads.
 /// </summary>
 public sealed class BlockStore
 {
@@ -34,8 +34,8 @@ public sealed class BlockStore
     }
 
     /// <summary>
-    /// Inserisce i blocchi mancanti e restituisce quanti sono nuovi. Un blocco già presente con un hash
-    /// diverso è un errore grave (con i blocchi finalizzati non deve mai succedere): si interrompe tutto.
+    /// Inserts missing blocks and returns how many were new. A block already stored with a different
+    /// hash is a serious error (it must never happen with finalized blocks): everything stops.
     /// </summary>
     public int Insert(IEnumerable<BlockRecord> blocks)
     {
@@ -86,7 +86,7 @@ public sealed class BlockStore
 
     public long Count() => Scalar("SELECT COUNT(*) FROM blocks;") ?? 0;
 
-    /// <summary>Numeri già salvati nell'intervallo [from, to].</summary>
+    /// <summary>Block numbers already stored in the range [from, to].</summary>
     public HashSet<long> ExistingNumbers(long from, long to)
     {
         using var conn = Open();
@@ -113,8 +113,8 @@ public sealed class BlockStore
     public BlockRecord? Latest() => Query("SELECT * FROM blocks ORDER BY number DESC LIMIT 1;").FirstOrDefault();
 
     /// <summary>
-    /// Blocchi in ordine crescente. Con <paramref name="from"/>: da quel numero in su.
-    /// Senza: gli ultimi <paramref name="limit"/> blocchi.
+    /// Blocks in ascending order. With <paramref name="from"/>: from that number upwards.
+    /// Without it: the last <paramref name="limit"/> blocks.
     /// </summary>
     public IReadOnlyList<BlockRecord> Range(long? from, int limit)
     {

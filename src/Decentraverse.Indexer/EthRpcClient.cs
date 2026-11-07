@@ -7,9 +7,9 @@ using System.Text.Json.Nodes;
 namespace Decentraverse.Indexer;
 
 /// <summary>
-/// Client JSON-RPC minimale per Ethereum, solo in lettura.
-/// Usa solo eth_getBlockByNumber e gestisce rate limit e errori temporanei con backoff esponenziale.
-/// Non scrive mai l'URL nei log: con Infura contiene la chiave.
+/// Minimal read-only JSON-RPC client for Ethereum.
+/// Uses only eth_getBlockByNumber and handles rate limits and transient errors with exponential backoff.
+/// Never writes the URL to the logs: with Infura it contains the API key.
 /// </summary>
 public sealed class EthRpcClient(HttpClient http, Uri endpoint)
 {
@@ -17,17 +17,17 @@ public sealed class EthRpcClient(HttpClient http, Uri endpoint)
     public TimeSpan BaseDelay { get; init; } = TimeSpan.FromSeconds(1);
     public TimeSpan MaxDelay { get; init; } = TimeSpan.FromSeconds(60);
 
-    // Codici JSON-RPC che indicano un limite di richieste (Infura usa -32005).
+    // JSON-RPC error codes that signal a rate limit (Infura uses -32005).
     private static readonly HashSet<int> RateLimitCodes = [-32005, -32029, -32090, 429];
 
-    /// <summary>L'ultimo blocco finalizzato: non può più essere annullato da una riorganizzazione della catena.</summary>
+    /// <summary>The latest finalized block: it can no longer be undone by a chain reorganization.</summary>
     public async Task<BlockRecord> GetFinalizedBlockAsync(CancellationToken ct)
     {
         var results = await CallAsync([BuildRequest(0, "finalized")], ct);
         return ParseBlock(results[0]);
     }
 
-    /// <summary>Più blocchi in una sola richiesta HTTP (batch JSON-RPC).</summary>
+    /// <summary>Several blocks in a single HTTP request (JSON-RPC batch).</summary>
     public async Task<IReadOnlyList<BlockRecord>> GetBlocksAsync(IReadOnlyList<long> numbers, CancellationToken ct)
     {
         if (numbers.Count == 0)
@@ -45,11 +45,11 @@ public sealed class EthRpcClient(HttpClient http, Uri endpoint)
         ["jsonrpc"] = "2.0",
         ["id"] = id,
         ["method"] = "eth_getBlockByNumber",
-        // false = transazioni come lista di hash: basta per contarle e la risposta è molto più leggera.
+        // false = transactions as a list of hashes: enough to count them, and the response is much smaller.
         ["params"] = new JsonArray(blockTag, false),
     };
 
-    /// <summary>Invia le richieste (singola o batch) con retry; restituisce i "result" nell'ordine delle richieste.</summary>
+    /// <summary>Sends the requests (single or batch) with retries; returns the "result" values in request order.</summary>
     private async Task<JsonNode[]> CallAsync(JsonObject[] requests, CancellationToken ct)
     {
         for (int attempt = 1; ; attempt++)
@@ -98,7 +98,7 @@ public sealed class EthRpcClient(HttpClient http, Uri endpoint)
         }
     }
 
-    /// <summary>Backoff esponenziale con jitter: 1s, 2s, 4s, ... fino a MaxDelay, ±25% casuale.</summary>
+    /// <summary>Exponential backoff with jitter: 1s, 2s, 4s, ... up to MaxDelay, ±25% random.</summary>
     private TimeSpan Backoff(int attempt)
     {
         double seconds = Math.Min(MaxDelay.TotalSeconds, BaseDelay.TotalSeconds * Math.Pow(2, attempt - 1));
@@ -108,7 +108,7 @@ public sealed class EthRpcClient(HttpClient http, Uri endpoint)
 
     internal static JsonNode[] ExtractResults(JsonNode json, int expected)
     {
-        // Un batch rifiutato in blocco può tornare come singolo oggetto di errore invece che come array.
+        // A batch rejected as a whole may come back as a single error object instead of an array.
         var items = json is JsonArray array ? array.ToArray() : [json];
         if (items.Length == 1 && expected > 1)
         {
@@ -166,7 +166,7 @@ public sealed class EthRpcClient(HttpClient http, Uri endpoint)
             GasUsed: Quantity(block["gasUsed"]!));
     }
 
-    /// <summary>Le quantità JSON-RPC sono stringhe esadecimali, es. "0x1b4".</summary>
+    /// <summary>JSON-RPC quantities are hexadecimal strings, e.g. "0x1b4".</summary>
     private static long Quantity(JsonNode node)
     {
         string s = node.GetValue<string>();

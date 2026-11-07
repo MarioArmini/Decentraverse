@@ -97,13 +97,13 @@ catch (Exception ex) when (ex is RpcException or InvalidOperationException or Ar
 
 static void WriteJson(string path, IReadOnlyList<BlockRecord> blocks)
 {
-    // I percorsi relativi partono dalla radice del repo, qualunque sia la cartella corrente.
+    // Relative paths start from the repo root, whatever the current folder is.
     string full = Path.GetFullPath(path, Settings.FindRepoRoot());
     Directory.CreateDirectory(Path.GetDirectoryName(full)!);
     File.WriteAllText(full, JsonSerializer.Serialize(blocks, new JsonSerializerOptions(JsonSerializerDefaults.Web) { WriteIndented = true }) + "\n");
 }
 
-/// <summary>Parser minimale per opzioni --nome valore e --flag.</summary>
+/// <summary>Minimal parser for --name value and --flag options.</summary>
 internal sealed class Options(Dictionary<string, string?> values)
 {
     public static Options Parse(ReadOnlySpan<string> args)

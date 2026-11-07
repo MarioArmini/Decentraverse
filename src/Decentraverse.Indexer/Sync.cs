@@ -1,11 +1,11 @@
 namespace Decentraverse.Indexer;
 
-/// <summary>Scarica blocchi finalizzati dal nodo e li salva. Usato da backfill e watch.</summary>
+/// <summary>Downloads finalized blocks from the node and stores them. Used by backfill and watch.</summary>
 public sealed class Sync(EthRpcClient rpc, BlockStore store)
 {
     public int BatchSize { get; init; } = 20;
 
-    /// <summary>Scarica gli ultimi <paramref name="count"/> blocchi finalizzati, saltando quelli già salvati.</summary>
+    /// <summary>Downloads the last <paramref name="count"/> finalized blocks, skipping those already stored.</summary>
     public async Task<int> BackfillAsync(int count, CancellationToken ct)
     {
         var finalized = await rpc.GetFinalizedBlockAsync(ct);
@@ -19,8 +19,8 @@ public sealed class Sync(EthRpcClient rpc, BlockStore store)
     }
 
     /// <summary>
-    /// Un giro di polling: porta il database fino all'ultimo blocco finalizzato.
-    /// Al primo avvio con database vuoto parte dall'ultimo finalizzato (per lo storico c'è backfill).
+    /// One polling round: brings the database up to the latest finalized block.
+    /// On first start with an empty database it begins at the latest finalized block (use backfill for history).
     /// </summary>
     public async Task<int> CatchUpAsync(CancellationToken ct)
     {
@@ -36,7 +36,7 @@ public sealed class Sync(EthRpcClient rpc, BlockStore store)
         return inserted;
     }
 
-    /// <summary>Esegue CatchUp a intervalli regolari; se fallisce, raddoppia l'attesa fino a 10 minuti.</summary>
+    /// <summary>Runs CatchUp at regular intervals; on failure it doubles the wait, up to 10 minutes.</summary>
     public async Task WatchAsync(TimeSpan interval, CancellationToken ct)
     {
         Log.Info($"Watch avviato: controllo ogni {interval.TotalSeconds:F0}s (i blocchi si finalizzano a gruppi di 32, circa ogni 6,4 minuti).");

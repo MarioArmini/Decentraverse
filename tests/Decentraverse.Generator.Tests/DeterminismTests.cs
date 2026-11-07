@@ -13,7 +13,7 @@ public class DeterminismTests
             var a = SystemGenerator.GenerateSystem(block);
             var b = SystemGenerator.GenerateSystem(block with { });
 
-            // Confronto "deep" tramite JSON: copre tutti i campi, liste comprese.
+            // Deep comparison via JSON: covers every field, lists included.
             Assert.Equal(JsonSerializer.Serialize(a, TestHelpers.Json), JsonSerializer.Serialize(b, TestHelpers.Json));
 
             for (int p = 0; p < a.Planets.Count; p++)

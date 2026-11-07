@@ -1,10 +1,10 @@
 namespace Decentraverse.Indexer;
 
 /// <summary>
-/// API HTTP di sola lettura (ASP.NET Core Minimal API, incluso nel framework).
-///   GET /blocks?from=&amp;limit=   blocchi in ordine crescente (senza from: gli ultimi `limit`)
-///   GET /blocks/{number}        un blocco, 404 se assente
-///   GET /latest                 l'ultimo blocco salvato, 404 se il database è vuoto
+/// Read-only HTTP API (ASP.NET Core Minimal API, part of the framework).
+///   GET /blocks?from=&amp;limit=   blocks in ascending order (without from: the last `limit`)
+///   GET /blocks/{number}        one block, 404 if missing
+///   GET /latest                 the latest stored block, 404 if the database is empty
 /// </summary>
 public static class Api
 {
@@ -17,7 +17,7 @@ public static class Api
         builder.WebHost.UseUrls($"http://localhost:{port}");
         builder.Logging.SetMinimumLevel(LogLevel.Warning);
 
-        // Il frontend gira su un'altra porta: va permesso il CORS. I dati sono pubblici e in sola lettura.
+        // The frontend runs on another port, so CORS must be allowed. The data is public and read-only.
         builder.Services.AddCors(o => o.AddDefaultPolicy(p => p.AllowAnyOrigin().WithMethods("GET")));
 
         var app = builder.Build();

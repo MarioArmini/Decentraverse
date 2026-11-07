@@ -11,9 +11,9 @@ internal readonly record struct ClassSpec(
 internal static class StarTables
 {
     /// <summary>
-    /// Distribuzione "giocabile" delle classi spettrali, pesi su 100.000.
-    /// Masse in milli-masse solari, temperature in K, luminosità in micro-luminosità solari.
-    /// I colori sono quelli convenzionali per classe (solo rendering).
+    /// "Playable" spectral class distribution, weights out of 100,000.
+    /// Masses in milli solar masses, temperatures in K, luminosities in micro solar luminosities.
+    /// Colors are the conventional ones per class (rendering only).
     /// </summary>
     public static readonly ClassSpec[] Classes =
     [
@@ -29,8 +29,8 @@ internal static class StarTables
     public const uint TotalWeight = 100_000;
 
     /// <summary>
-    /// Estrae una stella: 1) classe (NextBelow(100.000)), 2) posizione nella classe in per-mille (0..1000).
-    /// La stessa posizione interpola massa, temperatura e luminosità, così restano coerenti tra loro.
+    /// Draws a star: 1) class (NextBelow(100,000)), 2) position within the class in per-mille (0..1000).
+    /// The same position interpolates mass, temperature and luminosity, so they stay consistent.
     /// </summary>
     public static Star Draw(Xoshiro128StarStar rng, string designation)
     {
@@ -58,9 +58,9 @@ internal static class StarTables
     }
 
     /// <summary>
-    /// Bordi della zona abitabile in micro-UA, dalla luminosità L (micro-luminosità solari):
-    /// interno = √(L/1,1) UA, esterno = √(L/0,53) UA, calcolati con interi:
-    /// d[µUA] = 1000·√(L[µL☉]) / √1,1 = √(L·10⁶·10/11).
+    /// Habitable zone edges in micro-AU, from luminosity L (micro solar luminosities):
+    /// inner = √(L/1.1) AU, outer = √(L/0.53) AU, computed with integers:
+    /// d[µAU] = 1000·√(L[µL☉]) / √1.1 = √(L·10⁶·10/11).
     /// </summary>
     public static long HabitableInnerMicroAu(long luminosityMicroSolar) =>
         (long)IntMath.ISqrt((ulong)luminosityMicroSolar * 1_000_000UL / 11UL * 10UL);
@@ -68,6 +68,6 @@ internal static class StarTables
     public static long HabitableOuterMicroAu(long luminosityMicroSolar) =>
         (long)IntMath.ISqrt((ulong)luminosityMicroSolar * 1_000_000UL / 53UL * 100UL);
 
-    /// <summary>Bordo interno della HZ del Sole (≈ 953.462 µUA): riferimento per scalare le orbite.</summary>
+    /// <summary>Inner HZ edge of the Sun (≈ 953,462 µAU): reference used to scale orbits.</summary>
     public static readonly long SunHabitableInnerMicroAu = HabitableInnerMicroAu(1_000_000);
 }

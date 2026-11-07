@@ -31,8 +31,8 @@ public class RareEventsTests
     [Fact]
     public void BlackHoleFrequencyOverTwoMillionSeeds()
     {
-        // Atteso 2.000.000 / 65.536 ≈ 30,5. Si testa il solo predicato sul seme "rare"
-        // (costa un SHA-256), perché su 100.000 sistemi completi se ne vedrebbe ~1,5.
+        // Expected 2,000,000 / 65,536 ≈ 30.5. Only the predicate on the "rare" seed is tested
+        // (one SHA-256 each), because 100,000 full systems would contain only ~1.5.
         const int n = 2_000_000;
         int blackHoles = 0;
         for (int i = 0; i < n; i++)
@@ -49,7 +49,7 @@ public class RareEventsTests
     [Fact]
     public void BlackHoleSystemIsGeneratedWhenSeedMatches()
     {
-        // Cerca un hash sintetico che produce un buco nero e controlla il sistema risultante.
+        // Find a synthetic hash that yields a black hole and check the resulting system.
         for (int i = 0; ; i++)
         {
             string hash = TestHelpers.SyntheticHash(i);

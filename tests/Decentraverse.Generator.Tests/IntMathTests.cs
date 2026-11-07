@@ -34,7 +34,7 @@ public class IntMathTests
     [Fact]
     public void SunHabitableZoneIsRealistic()
     {
-        // Sole: HZ ≈ 0,95–1,37 UA.
+        // Sun: HZ ≈ 0.95–1.37 AU.
         Assert.Equal(953_462, StarTables.SunHabitableInnerMicroAu);
         Assert.InRange(StarTables.HabitableOuterMicroAu(1_000_000), 1_370_000, 1_380_000);
     }

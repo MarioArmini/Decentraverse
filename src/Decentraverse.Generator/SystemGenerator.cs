@@ -1,15 +1,15 @@
 namespace Decentraverse.Generator;
 
 /// <summary>
-/// Punto d'ingresso del generatore. Funzioni pure: stesso blocco → stesso output, sempre.
+/// Generator entry point. Pure functions: same block → same output, always.
 ///
-/// ATTENZIONE: l'ordine delle estrazioni dal PRNG fa parte delle regole.
-/// Spostare, aggiungere o togliere una sola estrazione cambia l'universo:
-/// in quel caso va alzata <see cref="GeneratorInfo.Version"/>.
+/// WARNING: the order of PRNG draws is part of the rules.
+/// Moving, adding or removing a single draw changes the universe:
+/// in that case <see cref="GeneratorInfo.Version"/> must be bumped.
 /// </summary>
 public static class SystemGenerator
 {
-    /// <summary>Scala della densità: gas usato e transazioni oltre queste soglie contano come "pieno".</summary>
+    /// <summary>Density scale: gas used and transactions above these thresholds count as "full".</summary>
     public const long DensityGasScale = 60_000_000;
     public const int DensityTxScale = 500;
 
@@ -24,18 +24,18 @@ public static class SystemGenerator
         string hash = BlockHash.Normalize(block.Hash);
         int density = ComputeDensity(block.TxCount, block.GasUsed);
 
-        // 1) Eventi rari: dal seme "rare", indipendente dal PRNG.
+        // 1) Rare events: from the "rare" seed, independent of the PRNG.
         byte[] rare = Seeds.Rare(hash);
         bool isBlackHole = RareEvents.IsBlackHole(rare);
         bool isBinary = !isBlackHole && RareEvents.IsBinary(rare);
 
-        // 2) Stella/e e struttura del sistema: dal seme "star".
+        // 2) Star(s) and system structure: from the "star" seed.
         var rng = Xoshiro128StarStar.FromSeed(Seeds.Star(hash));
         string name = NameGenerator.Generate(rng);
 
         if (isBlackHole)
         {
-            // v1: un buco nero non ha pianeti (solo il disco di accrescimento, che è rendering).
+            // v1: a black hole has no planets (only the accretion disk, which is rendering).
             var hole = new Star("A", StarKind.BlackHole, null, rng.NextInt(5_000, 30_001), 0, 0, 0x000000);
             return new StarSystem(GeneratorInfo.Version, block.Number, hash, name,
                 IsBlackHole: true, IsBinary: false, [hole], 0, 0, 0, density, []);
@@ -51,7 +51,7 @@ public static class SystemGenerator
             Star companion = StarTables.Draw(rng, "B");
             if (companion.MassMilliSolar > primary.MassMilliSolar)
             {
-                // La stella A è sempre la più massiccia.
+                // Star A is always the more massive one.
                 (primary, companion) = (companion with { Designation = "A" }, primary with { Designation = "B" });
             }
             stars = [primary, companion];
@@ -62,14 +62,14 @@ public static class SystemGenerator
         long hzInner = StarTables.HabitableInnerMicroAu(luminosity);
         long hzOuter = StarTables.HabitableOuterMicroAu(luminosity);
 
-        // Binaria stretta: i pianeti orbitano attorno a entrambe le stelle (circumbinari) e
-        // nessuno può stare entro 3 volte la separazione: tutte le orbite si spostano in fuori.
+        // Close binary: planets orbit both stars (circumbinary) and
+        // none may lie within 3 times the separation: all orbits are shifted outwards.
         long separation = hzInner * separationPercent / 100;
         long orbitOffset = 3 * separation;
 
         int planetCount = IntMath.Pick<int>(rng, PlanetCounts);
 
-        // 3) Pianeti: ognuno dal proprio seme.
+        // 3) Planets: each from its own seed.
         var planets = new Planet[planetCount];
         for (int i = 0; i < planetCount; i++)
         {
@@ -80,7 +80,7 @@ public static class SystemGenerator
             IsBlackHole: false, isBinary, stars, separation, hzInner, hzOuter, density, planets);
     }
 
-    /// <summary>Lune del pianeta <paramref name="planetIndex"/>: generate solo su richiesta, ognuna dal proprio seme.</summary>
+    /// <summary>Moons of planet <paramref name="planetIndex"/>: generated only on demand, each from its own seed.</summary>
     public static IReadOnlyList<Moon> GenerateMoons(BlockInput block, int planetIndex)
     {
         StarSystem system = GenerateSystem(block);
@@ -100,7 +100,7 @@ public static class SystemGenerator
         {
             var rng = Xoshiro128StarStar.FromSeed(Seeds.Moon(system.BlockHash, planetIndex, j));
 
-            // Orbita base (4 + 3j) raggi planetari + rumore < 1,5 raggi: sempre crescente con j.
+            // Base orbit (4 + 3j) planet radii + noise < 1.5 radii: always increasing with j.
             long orbit = (long)planetRadiusKm * (4 + 3 * j) + rng.NextBelow((uint)(planetRadiusKm * 3 / 2));
             int radius = rng.NextInt(100, maxMoonRadiusKm + 1);
             MoonType type = IntMath.Pick<MoonType>(rng, weights);
@@ -111,7 +111,7 @@ public static class SystemGenerator
         return moons;
     }
 
-    /// <summary>Densità 0..1000: media di gas usato e numero di transazioni, entrambi saturati alla scala.</summary>
+    /// <summary>Density 0..1000: average of gas used and transaction count, each capped at its scale.</summary>
     public static int ComputeDensity(int txCount, long gasUsed)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(txCount);
@@ -126,8 +126,8 @@ public static class SystemGenerator
     {
         var rng = Xoshiro128StarStar.FromSeed(Seeds.Planet(hash, index));
 
-        // Titius-Bode per il Sole: 0,4 / 0,7 / 1,0 / 1,6 / 2,8 / 5,2 / 10 / 19,6 ... UA (in milli-UA),
-        // con rumore ±15% (non rompe mai l'ordine) e scalata con la zona abitabile della stella.
+        // Titius-Bode for the Sun: 0.4 / 0.7 / 1.0 / 1.6 / 2.8 / 5.2 / 10 / 19.6 ... AU (in milli-AU),
+        // with ±15% noise (never breaks the ordering), scaled by the star's habitable zone.
         long baseMilliAu = index == 0 ? 400 : 400 + (300L << (index - 1));
         int noisePerMille = rng.NextInt(850, 1_151);
         long orbit = baseMilliAu * noisePerMille * hzInner / StarTables.SunHabitableInnerMicroAu + orbitOffset;

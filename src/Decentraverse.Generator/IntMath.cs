@@ -2,7 +2,7 @@ namespace Decentraverse.Generator;
 
 internal static class IntMath
 {
-    /// <summary>Radice quadrata intera (floor), metodo bit per bit: solo interi, risultato esatto.</summary>
+    /// <summary>Integer square root (floor), bit-by-bit method: integers only, exact result.</summary>
     public static ulong ISqrt(ulong n)
     {
         ulong result = 0;
@@ -29,7 +29,7 @@ internal static class IntMath
         return result;
     }
 
-    /// <summary>Interpolazione lineare intera: lo + (hi - lo) * perMille / 1000.</summary>
+    /// <summary>Integer linear interpolation: lo + (hi - lo) * perMille / 1000.</summary>
     public static long Lerp(long lo, long hi, int perMille) => lo + (hi - lo) * perMille / 1000;
 
     public static T Pick<T>(Xoshiro128StarStar rng, ReadOnlySpan<(T Value, uint Weight)> items)

@@ -4,7 +4,7 @@ public class SeedsTests
 {
     private const string Hash = "0xabababababababababababababababababababababababababababababababab";
 
-    // Valori calcolati in modo indipendente con: printf '%s' "v1:<hash>:star" | shasum -a 256
+    // Values computed independently with: printf '%s' "v1:<hash>:star" | shasum -a 256
     [Fact]
     public void SeedsMatchShasum()
     {
