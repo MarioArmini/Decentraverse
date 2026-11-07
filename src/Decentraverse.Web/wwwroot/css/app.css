@@ -33,6 +33,10 @@ a { color: var(--accent); }
 .hud h1 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: 0.04em; }
 .hud .tagline { margin: 2px 0 8px; color: var(--muted); }
 .hud .status { margin: 0; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+.lang { margin-top: 10px; display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; pointer-events: auto; }
+.lang button { background: none; border: 0; color: var(--muted); font: 600 11px/1 inherit; letter-spacing: 0.06em; padding: 5px 9px; cursor: pointer; }
+.lang button:hover { color: var(--text); }
+.lang button.active { background: rgba(143, 180, 255, 0.16); color: var(--text); }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); display: inline-block; }
 .dot.live { background: var(--live); box-shadow: 0 0 8px var(--live); }
 .dot.offline { background: var(--offline); }

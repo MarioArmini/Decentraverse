@@ -2,28 +2,33 @@
 @inject IJSRuntime JS
 @inject BlockSource Source
 @inject NavigationManager Nav
+@inject Texts T
 
 <div class="stage" @ref="_stage"></div>
 
 <header class="hud">
     <h1>Decentraverse</h1>
-    <p class="tagline">Ogni blocco finalizzato di Ethereum è un sistema stellare.</p>
+    <p class="tagline">@T.Tagline</p>
     <p class="status">
         @switch (Source.Mode)
         {
             case SourceMode.Loading:
-                <span class="dot"></span> @_loadingText
+                <span class="dot"></span> @(_generating is int count ? T.Generating(count) : T.ContactingIndexer)
                 break;
             case SourceMode.Live:
                 <span class="dot live"></span>
-                <span>Live dall'indexer · @Labels.Number(_blocks.Count) sistemi · ultimo blocco #@Labels.Number(_reference)</span>
+                <span>@T.Live(_blocks.Count, _reference)</span>
                 break;
             default:
                 <span class="dot offline"></span>
-                <span>Offline: indexer non raggiungibile, uso @Labels.Number(_blocks.Count) blocchi salvati</span>
+                <span>@T.Offline(_blocks.Count)</span>
                 break;
         }
     </p>
+    <div class="lang" role="group" aria-label="@T.LanguageSwitch">
+        <button class="@(T.Language == Language.En ? "active" : "")" @onclick="() => SetLanguageAsync(Language.En)" lang="en">EN</button>
+        <button class="@(T.Language == Language.It ? "active" : "")" @onclick="() => SetLanguageAsync(Language.It)" lang="it">IT</button>
+    </div>
 </header>
 
 @if (_selected is not null && _system is not null)
@@ -36,10 +41,10 @@ else if (_blocks.Count > 0)
     <aside class="legend">
         @foreach (var (cls, color, count) in Legend())
         {
-            <div><span class="swatch @(cls == "BH" ? "bh" : "")" style="--c:#@color.ToString("x6")"></span>@ClassLabel(cls)<span class="count">@Labels.Number(count)</span></div>
+            <div><span class="swatch @(cls == "BH" ? "bh" : "")" style="--c:#@color.ToString("x6")"></span>@T.ClassName(cls)<span class="count">@T.Number(count)</span></div>
         }
     </aside>
-    <p class="hint">Trascina per spostarti · rotella per lo zoom · clic su una stella per aprire il suo sistema</p>
+    <p class="hint">@T.Hint</p>
 }
 
 @code {
@@ -51,7 +56,7 @@ else if (_blocks.Count > 0)
     private readonly SortedDictionary<long, BlockInput> _blocks = new();
     private readonly Dictionary<long, StarSystem> _systems = new();
     private long _reference;
-    private string _loadingText = "Contatto l'indexer…";
+    private int? _generating;
 
     private BlockInput? _selected;
     private StarSystem? _system;
@@ -69,8 +74,13 @@ else if (_blocks.Count > 0)
         _renderer = await JS.InvokeAsync<IJSObjectReference>("import", "./js/renderer.js");
         await _renderer.InvokeVoidAsync("init", _stage, _self);
 
+        // Language: the stored choice, otherwise the browser's language (Italian or English).
+        T.Set(await _renderer.InvokeAsync<string>("preferredLanguage"));
+        await _renderer.InvokeVoidAsync("applyLanguage", T.Code, T.RendererTexts, false);
+        StateHasChanged();
+
         var blocks = await Source.LoadInitialAsync();
-        _loadingText = $"Genero {blocks.Count} sistemi…";
+        _generating = blocks.Count;
         StateHasChanged();
         await Task.Yield();
 
@@ -227,7 +237,14 @@ else if (_blocks.Count > 0)
             .Select(g => (g.Key, g.First().Stars[0].ColorRgb, g.Count()))
             .OrderBy(x => "OBAFGKMBH".IndexOf(x.Key == "BH" ? "BH" : x.Key, StringComparison.Ordinal));
 
-    private static string ClassLabel(string cls) => cls == "BH" ? "Buchi neri" : $"Classe {cls}";
+    private async Task SetLanguageAsync(Language language)
+    {
+        T.Set(language == Language.It ? "it" : "en");
+        if (_renderer is not null)
+        {
+            await _renderer.InvokeVoidAsync("applyLanguage", T.Code, T.RendererTexts, true);
+        }
+    }
 
     public async ValueTask DisposeAsync()
     {

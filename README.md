@@ -98,6 +98,10 @@ About **one block in 32** produces a close binary. In *Faeniol* (block [#26,361,
 
 Every view has its own URL. Open the system above with `http://localhost:5080/#/block/26361404`, or open Kruxe with its giant already selected with `/#/block/26361449/planet/5`. Blocks that are not on the map are fetched from the indexer.
 
+### English and Italian
+
+The interface speaks **English and Italian**. It follows your browser's language, the **EN | IT** switch under the title changes it instantly (numbers and dates included: `1,000.5` or `1.000,5`), and your choice is remembered. A link can also force a language: `http://localhost:5080/?lang=it#/block/26361404`.
+
 ---
 
 ## How it works
@@ -219,7 +223,7 @@ Either way, the result is **Shagonelax**:
 
 The same answer is pinned in [`Golden/v1.json`](tests/Decentraverse.Generator.Tests/Golden/v1.json), so `dotnet test` catches any drift.
 
-In the app, the "Come verificarlo" (*how to verify it*) section of each system's panel shows the same command and seeds. The interface is in Italian; the code and docs are in English.
+In the app, the "How to verify it" section of each system's panel shows the same command and seeds.
 
 ---
 

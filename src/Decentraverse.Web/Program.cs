@@ -10,5 +10,6 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 // HttpClient for files served with the app itself (the offline fixture).
 builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddScoped<BlockSource>();
+builder.Services.AddScoped<Texts>();
 
 await builder.Build().RunAsync();

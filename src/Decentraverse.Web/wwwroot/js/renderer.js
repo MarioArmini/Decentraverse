@@ -130,6 +130,36 @@ export function showGalaxy(focusNumber) {
     }
 }
 
+const LANGUAGE_KEY = 'decentraverse.language';
+
+// Words for the tooltip; replaced by applyLanguage().
+let texts = { block: 'block', class: 'class', binary: 'binary', blackHole: 'black hole', locale: 'en-US' };
+
+/** A ?lang= in the URL, otherwise the viewer's saved choice, otherwise the browser's language. */
+export function preferredLanguage() {
+    const fromUrl = new URLSearchParams(location.search).get('lang');
+    if (fromUrl) return fromUrl;
+    try {
+        const saved = localStorage.getItem(LANGUAGE_KEY);
+        if (saved) return saved;
+    } catch {
+        // Storage can be unavailable (private mode, blocked site data): fall back to the browser.
+    }
+    return navigator.language || 'en';
+}
+
+export function applyLanguage(code, words, remember) {
+    texts = words;
+    document.documentElement.lang = code;
+    if (remember) {
+        try {
+            localStorage.setItem(LANGUAGE_KEY, code);
+        } catch {
+            // Not saved: the choice still applies to this visit.
+        }
+    }
+}
+
 export function dispose() {
     window.removeEventListener('resize', onResize);
     app?.destroy(true, { children: true, texture: true });
@@ -437,8 +467,9 @@ function updateHover(x, y) {
     if (mode === 'galaxy') {
         const star = pickStar(x, y);
         if (star) {
-            const kind = star.data.k === 1 ? 'buco nero' : star.data.k === 2 ? `classe ${star.data.cls} · binaria` : `classe ${star.data.cls}`;
-            showTooltip(x, y, `<b>${escapeHtml(star.data.name)}</b><br>blocco #${star.data.n.toLocaleString('it-IT')} · ${kind}`);
+            const cls = `${texts.class} ${star.data.cls}`;
+            const kind = star.data.k === 1 ? texts.blackHole : star.data.k === 2 ? `${cls} · ${texts.binary}` : cls;
+            showTooltip(x, y, `<b>${escapeHtml(star.data.name)}</b><br>${texts.block} #${star.data.n.toLocaleString(texts.locale)} · ${kind}`);
             app.canvas.style.cursor = 'pointer';
             return;
         }
