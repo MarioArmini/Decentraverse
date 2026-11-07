@@ -1,8 +1,10 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Decentraverse.Generator/Decentraverse.Generator.csproj" />
+    <Project Path="src/Decentraverse.Indexer/Decentraverse.Indexer.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Decentraverse.Generator.Tests/Decentraverse.Generator.Tests.csproj" />
+    <Project Path="tests/Decentraverse.Indexer.Tests/Decentraverse.Indexer.Tests.csproj" />
   </Folder>
 </Solution>
