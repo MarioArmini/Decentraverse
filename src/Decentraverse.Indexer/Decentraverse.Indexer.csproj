@@ -15,4 +15,8 @@
     <InternalsVisibleTo Include="Decentraverse.Indexer.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Decentraverse.Generator\Decentraverse.Generator.csproj" />
+  </ItemGroup>
+
 </Project>

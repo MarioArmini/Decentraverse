@@ -6,7 +6,7 @@
         @Labels.StarDescription(System.Stars[0])
         @if (System.IsBinary)
         {
-            <span> + @Labels.StarDescription(System.Stars[1]).ToLowerInvariant() · sistema binario</span>
+            <span> + @LowerFirst(Labels.StarDescription(System.Stars[1])) · sistema binario</span>
         }
     </p>
 
@@ -124,4 +124,6 @@
     private string StarSeedInput => $"{GeneratorInfo.Version}:{System.BlockHash}:star";
 
     private static string Hex(byte[] bytes) => Convert.ToHexStringLower(bytes);
+
+    private static string LowerFirst(string text) => char.ToLowerInvariant(text[0]) + text[1..];
 }

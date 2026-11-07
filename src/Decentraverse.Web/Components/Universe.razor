@@ -1,6 +1,7 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 @inject BlockSource Source
+@inject NavigationManager Nav
 
 <div class="stage" @ref="_stage"></div>
 
@@ -76,7 +77,35 @@ else if (_blocks.Count > 0)
         await AddBlocksAsync(blocks, animate: false);
         StateHasChanged();
 
+        await OpenFromUrlAsync();
         _ = PollAsync(_stop.Token);
+    }
+
+    /// <summary>
+    /// Deep links: #/block/{number} opens that system, #/block/{number}/planet/{index} also selects
+    /// a planet. Blocks outside the loaded map are requested from the indexer API.
+    /// </summary>
+    private async Task OpenFromUrlAsync()
+    {
+        string[] parts = new Uri(Nav.Uri).Fragment.TrimStart('#').Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length < 2 || parts[0] != "block" || !long.TryParse(parts[1], out long number))
+        {
+            return;
+        }
+
+        var block = _blocks.GetValueOrDefault(number) ?? await Source.GetBlockAsync(number);
+        if (block is null)
+        {
+            Console.WriteLine($"Block {number} is neither loaded nor available from the indexer.");
+            return;
+        }
+
+        await OpenSystemAsync(block);
+        if (parts.Length >= 4 && parts[2] == "planet" && int.TryParse(parts[3], out int planet)
+            && planet >= 0 && planet < _system!.Planets.Count)
+        {
+            await SelectPlanet(planet);
+        }
     }
 
     /// <summary>Generates the new systems and sends the whole map to the renderer.</summary>
@@ -130,18 +159,31 @@ else if (_blocks.Count > 0)
     [JSInvokable]
     public async Task OnStarClicked(long number)
     {
-        if (!_blocks.TryGetValue(number, out var block) || _renderer is null)
+        if (_blocks.TryGetValue(number, out var block))
+        {
+            await OpenSystemAsync(block);
+        }
+    }
+
+    private async Task OpenSystemAsync(BlockInput block)
+    {
+        if (_renderer is null)
         {
             return;
         }
 
         _selected = block;
-        _system = _systems[number];
+        _system = _systems.GetValueOrDefault(block.Number) ?? SystemGenerator.GenerateSystem(block);
         _moons = null;
         _selectedPlanet = null;
         await _renderer.InvokeVoidAsync("showSystem", SceneBuilder.ToSystemScene(_system));
+        await SetFragmentAsync($"#/block/{block.Number}");
         StateHasChanged();
     }
+
+    /// <summary>Keeps the address bar in sync, so the current view can be shared as a link.</summary>
+    private ValueTask SetFragmentAsync(string fragment) =>
+        JS.InvokeVoidAsync("history.replaceState", null, "", Nav.BaseUri + fragment);
 
     [JSInvokable]
     public Task OnPlanetClicked(int index) => SelectPlanet(index);
@@ -161,6 +203,7 @@ else if (_blocks.Count > 0)
         var scene = SceneBuilder.ToSystemScene(_system);
         var moons = SceneBuilder.ToSceneMoons(planet, _moons, scene.Planets[index].S);
         await _renderer.InvokeVoidAsync("showMoons", index, moons);
+        await SetFragmentAsync($"#/block/{_selected.Number}/planet/{index}");
         StateHasChanged();
     }
 
@@ -174,6 +217,7 @@ else if (_blocks.Count > 0)
         _system = null;
         _moons = null;
         _selectedPlanet = null;
+        await SetFragmentAsync("");
     }
 
     /// <summary>Spectral classes present on the map, hottest first, with their color and count.</summary>

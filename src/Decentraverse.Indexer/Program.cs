@@ -12,6 +12,7 @@ const string Usage = """
       export --count N --out FILE   esporta gli ultimi N blocchi del database in JSON (fixture offline)
       fetch --numbers A,B,C --out FILE
                                     scarica blocchi specifici dal nodo in JSON (fixture dei golden test)
+      system --number N [--moons]   stampa semi e sistema generato di un blocco, in JSON (verifica a mano)
     """;
 
 if (args.Length == 0 || args[0] is "-h" or "--help" or "help")
@@ -75,6 +76,14 @@ try
             var blocks = await rpc.GetBlocksAsync(numbers, cts.Token);
             WriteJson(options.Required("out"), blocks);
             Log.Info($"Scaricati {blocks.Count} blocchi.");
+            break;
+        }
+
+        case "system":
+        {
+            long number = long.Parse(options.Required("number"), CultureInfo.InvariantCulture);
+            var block = store.Get(number) ?? (await rpc.GetBlocksAsync([number], cts.Token))[0];
+            Console.WriteLine(SystemReport.Build(block, options.Flag("moons")));
             break;
         }
 

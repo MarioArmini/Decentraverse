@@ -42,6 +42,28 @@ public sealed class BlockSource(HttpClient localHttp, IConfiguration config)
         return await localHttp.GetFromJsonAsync<List<BlockInput>>("data/fixture-blocks.json") ?? [];
     }
 
+    /// <summary>One block by number from the indexer API (for deep links); null when unavailable.</summary>
+    public async Task<BlockInput?> GetBlockAsync(long number)
+    {
+        if (Mode != SourceMode.Live)
+        {
+            return null;
+        }
+
+        try
+        {
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var response = await _api.GetAsync($"blocks/{number}", timeout.Token);
+            return response.IsSuccessStatusCode
+                ? await response.Content.ReadFromJsonAsync<BlockInput>(timeout.Token)
+                : null;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        {
+            return null;
+        }
+    }
+
     /// <summary>Blocks newer than <paramref name="afterNumber"/>; empty when offline or on errors.</summary>
     public async Task<IReadOnlyList<BlockInput>> FetchNewerAsync(long afterNumber)
     {
