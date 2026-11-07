@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Decentraverse.Generator/Decentraverse.Generator.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Decentraverse.Generator.Tests/Decentraverse.Generator.Tests.csproj" />
+  </Folder>
+</Solution>
