@@ -64,7 +64,7 @@ try
         {
             var blocks = store.Range(null, options.Int("count", 500));
             WriteJson(options.Required("out"), blocks);
-            Log.Info($"Esportati {blocks.Count} blocchi in {options.Required("out")}.");
+            Log.Info($"Esportati {blocks.Count} blocchi.");
             break;
         }
 
@@ -74,7 +74,7 @@ try
                 .Select(s => long.Parse(s.Trim(), CultureInfo.InvariantCulture)).ToArray();
             var blocks = await rpc.GetBlocksAsync(numbers, cts.Token);
             WriteJson(options.Required("out"), blocks);
-            Log.Info($"Scaricati {blocks.Count} blocchi in {options.Required("out")}.");
+            Log.Info($"Scaricati {blocks.Count} blocchi.");
             break;
         }
 
@@ -97,7 +97,8 @@ catch (Exception ex) when (ex is RpcException or InvalidOperationException or Ar
 
 static void WriteJson(string path, IReadOnlyList<BlockRecord> blocks)
 {
-    string full = Path.GetFullPath(path);
+    // I percorsi relativi partono dalla radice del repo, qualunque sia la cartella corrente.
+    string full = Path.GetFullPath(path, Settings.FindRepoRoot());
     Directory.CreateDirectory(Path.GetDirectoryName(full)!);
     File.WriteAllText(full, JsonSerializer.Serialize(blocks, new JsonSerializerOptions(JsonSerializerDefaults.Web) { WriteIndented = true }) + "\n");
 }
